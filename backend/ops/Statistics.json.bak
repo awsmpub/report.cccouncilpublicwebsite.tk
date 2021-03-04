@@ -1,0 +1,52 @@
+{
+    "stats-table-dev": [
+        {
+            "PutRequest": {
+                "Item": {
+                    "statId": {
+                        "S": "Vehicle Accidents"
+                    },
+                    "statValue": {
+                        "N": "5000"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Id": {
+                        "S": "Pedestrian Accidents"
+                    },
+                    "Title": {
+                        "N": "233"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Id": {
+                        "S": "Deaths"
+                    },
+                    "Title": {
+                        "N": "13"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Id": {
+                        "S": "Injuries"
+                    },
+                    "Title": {
+                        "N": "2300"
+                    }
+                }
+            }
+        }        
+    ]
+}

@@ -1,0 +1,97 @@
+# serverless.yml
+
+org: srvlessfwrk
+app: dashboard
+service: dashboard-api
+
+plugins:
+  - serverless-python-requirements
+  - serverless-wsgi
+  - serverless-dynamodb-local
+  - serverless-finch
+
+custom:
+  tableName: 'stats-table-${self:provider.stage}'
+  wsgi:
+    app: app.app
+    packRequirements: false
+  pythonRequirements:
+    dockerizePip: non-linux
+  dynamodb:
+    start:
+      migrate: true
+    stages:
+      - ${self:provider.stage}
+  client:
+    bucketName: dashboard.cccouncilpublicwebsite.tk
+    distributionFolder: frontend
+    errorDocument: index.html
+
+package:
+  exclude:
+    - node_modules/**
+    - frontend/**
+    - venv/**
+    - ops/**
+    - .dynamodb/**
+    - .serverless/**
+    - .vscode/**
+    - __pycache__/**
+    - package-lock.json
+    - .DS_Store
+
+provider:
+  name: aws
+  runtime: python3.6
+  stage: dev
+  region: ap-southeast-2
+  lambdaHashingVersion: 20201221
+  apiGateway:
+    shouldStartNameWithService: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - { "Fn::GetAtt": ["StatsDynamoDBTable", "Arn" ] }
+  environment:
+    STATS_TABLE: ${self:custom.tableName}
+
+functions:
+  app:
+    handler: wsgi_handler.handler
+    events:
+      - http: ANY /
+      - http: 'ANY /{proxy+}'
+  getStat:
+    handler: wsgi_handler.handler
+    events:
+      - http: 'GET /stats/{proxy+}'
+  createStat:
+    handler: wsgi_handler.handler
+    events:
+      - http: 'POST /stats'
+
+resources:
+  Resources:
+    StatsDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: statId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: statId
+            KeyType: HASH
+
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.tableName}
