@@ -1,21 +1,16 @@
-# serverless.yml
-
 service: dashboard-api
 app: dashboard
 org: srvlessfwrk
 
-frameworkVersion: '2'
-
 provider:
   name: aws
   runtime: python3.7
-  stage: dev
   region: ap-southeast-2
-
   lambdaHashingVersion: 20201221
   apiGateway:
     shouldStartNameWithService: true
-
+  environment:
+    DYNAMODB_TABLE: trafficStats
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -24,38 +19,14 @@ provider:
         - dynamodb:PutItem
       Resource: "arn:aws:dynamodb:*:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
-  # iam:
-  #   role:
-  #     statements:
-  #       - Effect: Allow
-  #         Action:
-  #           - dynamodb:Query
-  #           - dynamodb:Scan
-  #           - dynamodb:GetItem
-  #           - dynamodb:PutItem
-  #           - dynamodb:UpdateItem
-  #           - dynamodb:DeleteItem
-  #         Resource:
-  #           - { "Fn::GetAtt": ["StatsDynamoDBTable", "Arn" ] }
-
-  environment:
-    DYNAMODB_TABLE: trafficStats
-
-package:
-  exclude:
-    - node_modules/**
-    - backend/frontend/**
-    - backend/venv/**
-    - backend/.vscode/**
-    - backend/__pycache__/**
-    - backend/.dynamodb/**
-    - ops/**    
-    - .serverless/**
-    - package-lock.json
-    - favicon_io.zip
-    - "/.DS_Store"
-
 functions:
+  # recordTrafficStat:
+  #   handler: backend/record_traffic_stat.handler
+  #   events:
+  #     - http:
+  #         path: stat/record
+  #         method: post
+  #         cors: true
   getTrafficStat:
     handler: backend/get_traffic_stat.handler
     events:
@@ -67,7 +38,7 @@ functions:
 resources:
   Resources:
     trafficStats:
-      Type: 'AWS::DynamoDB::Table'
+      Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:provider.environment.DYNAMODB_TABLE}
         AttributeDefinitions:
@@ -80,6 +51,9 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
+plugins:
+  - serverless-finch
+
 custom:
   client:
     bucketName: dashboard.cccouncilpublicwebsite.tk
@@ -87,5 +61,15 @@ custom:
     indexDocument: index.html
     errorDocument: error.html
 
-plugins:
-  - serverless-finch
+package:
+  exclude:
+    - node_modules/**
+    - backend/frontend/**
+    - backend/venv/**
+    - backend/.vscode/**
+    - backend/__pycache__/**
+    - backend/.dynamodb/**
+    - ops/**    
+    - .serverless/**
+    - package-lock.json
+    - "/.DS_Store"    

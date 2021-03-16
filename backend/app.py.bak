@@ -1,0 +1,37 @@
+# app.py
+# Community Traffic Safety Dashboard
+# Allows residents to save statistics around Traffic Safety within the city
+
+import os
+import boto3
+import json
+
+STATS_TABLE = os.environ['STATS_TABLE']
+IS_OFFLINE = os.environ.get('IS_OFFLINE')
+
+if(IS_OFFLINE):
+    client = boto3.client('dynamodb', region_name='localhost', endpoint_url='http://localhost:8000')
+else:
+    client = boto3.client('dynamodb')
+
+# client = boto3.client('dynamodb')
+
+def handler(event, context):
+    stat_name = json.loads(event['body'])['stat_name']
+    result = dynamodb.update_item(
+        TableName=os.environ['STATS_TABLE'],
+        Key={
+            'statName':{'S': stat_name}
+        },
+        UpdateExpression='ADD statValue :inc',
+        ExpressionAttributeValues={
+            ':inc': {'N': '1'}
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    response = {
+        "statusCode": 200,
+        "headers": {"Access-Control-Allow-Origin": "*"},
+        "body": json.dumps({"statValue": result["Attributes"]["statValue"]["N"]})
+    }
+    return response
