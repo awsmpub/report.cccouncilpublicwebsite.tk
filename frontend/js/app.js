@@ -1,39 +1,46 @@
 
-$(document).ready(function(){
-  refreshStatCounts();
-  // document.getElementById("refreshstats").addEventListener("click", test);
-});
-
-//   setInterval(refreshStatCounts, 500, )
-
-var get_stats_endpoint = "https://2kgkqn4ohc.execute-api.ap-southeast-2.amazonaws.com/dev/stats"
-
-// function refreshstats() {
-//   console.log("Refresh Stats...")
-// }
-
-function setStats(statName, statValue) {
-  // Get div containing stat count and set the new statValue
-  document.getElementsByClassName(statName)[0].innerHTML = statValue;
+function refreshPage(event) {
+  location.reload()
 }
 
-async function refreshStatCounts() {
-  // Get the stat counts
-  const response = await fetch(get_stats_endpoint);
-  const stats = await response.json();
-  // Iterate over all three featured stats and update the values
-  var i;
-  for (i = 0; i < stats.length; i++){
-    // console.log(stats[i])
-    var tracked_stats = ["deaths", "accidents", "injuries"];
-    var stat = stats[i]
-    if (tracked_stats.includes(stat["statName"])){
-      console.log(stat)
-      setStats(stat["statName"], stat["statValue"])
+function setVisibilityDisplay(element, setVisibility, setDisplay) {
+  document.getElementById(element).style.visibility = setVisibility
+  document.getElementById(element).style.display = setDisplay
+}
+
+async function handleFormSubmit(event) {
+  
+  event.preventDefault();
+  const form = event.currentTarget;
+  const url = "https://4aa1igme75.execute-api.ap-southeast-2.amazonaws.com/dev/report/"
+  
+  const formData = new FormData(document.getElementById("reportForm"));
+
+  //set visibility of components
+  setVisibilityDisplay("cardShowHideSubmitForm", "hidden", "none")
+  setVisibilityDisplay("cardShowHideEmergencyLights", "hidden", "none")
+  setVisibilityDisplay("cardShowHideSpinner", "visible", "block")
+
+  try {
+    const responseData = await fetch(url, {
+      method:'POST',
+      body: formData
+    });
+    
+    if(responseData.ok) {
+      //The API Reponse is a 2XX
+      //set visibility of components
+      setVisibilityDisplay("cardShowHideOKGreenTick", "visible", "block")
+      setVisibilityDisplay("cardShowHideSpinner", "hidden", "none")
     }
-  }
-}
+    else {
+      //set visibility of components
+      setVisibilityDisplay("cardShowHideErrorRedX", "visible", "block")
+      setVisibilityDisplay("cardShowHideSpinner", "hidden", "none")      
+    }
 
-function recordStat() {
-  console.log("Refreshed...")
+  }
+  catch(error) {
+    console.error(error);
+  }
 }

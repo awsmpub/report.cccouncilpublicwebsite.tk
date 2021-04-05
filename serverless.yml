@@ -1,6 +1,6 @@
 # serverless.yml
 
-service: dashboard-api
+service: report-api
 app: dashboard
 org: srvlessfwrk
 
@@ -15,31 +15,77 @@ provider:
   lambdaHashingVersion: 20201221
   apiGateway:
     shouldStartNameWithService: true
+    binaryMediaTypes:
+      - 'multipart/form-data'
 
-  iamRoleStatements:
-    - Effect: "Allow"
-      Action:
-        - dynamodb:Scan
-        - dynamodb:UpdateItem
-        - dynamodb:PutItem
-      Resource: "arn:aws:dynamodb:*:*:table/${self:provider.environment.DYNAMODB_TABLE}"
-
-  # iam:
-  #   role:
-  #     statements:
-  #       - Effect: Allow
-  #         Action:
-  #           - dynamodb:Query
-  #           - dynamodb:Scan
-  #           - dynamodb:GetItem
-  #           - dynamodb:PutItem
-  #           - dynamodb:UpdateItem
-  #           - dynamodb:DeleteItem
-  #         Resource:
-  #           - { "Fn::GetAtt": ["StatsDynamoDBTable", "Arn" ] }
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 's3:ListBucket'
+          Resource:
+            Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Ref: trafficReportsBucket
+        - Effect: 'Allow'
+          Action:
+            - 's3:PutObject'
+          Resource:
+            Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Ref: trafficReportsBucket
+                - '/*'
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+          Resource: "arn:aws:dynamodb:*:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+            # - { "Fn::GetAtt": ["trafficReportsTable", "Arn" ] }
 
   environment:
-    DYNAMODB_TABLE: trafficStats
+    DYNAMODB_TABLE: trafficReportsTable
+
+resources:
+  Resources:
+    trafficReportsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: trafficreports.cccouncilpublicwebsite.tk
+    trafficReportsTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: reporterEmail
+            AttributeType: S
+        KeySchema:
+          - AttributeName: reporterEmail
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+functions:
+  sendTrafficReport:
+    handler: backend/send_report.handler
+    events:
+      - http:
+          path: report
+          method: post
+          cors: true
+
+custom:
+  client:
+    bucketName: report.cccouncilpublicwebsite.tk
+    distributionFolder: frontend
+    indexDocument: index.html
+    errorDocument: error.html
+
+plugins:
+  - serverless-finch
 
 package:
   exclude:
@@ -52,40 +98,5 @@ package:
     - ops/**    
     - .serverless/**
     - package-lock.json
-    - favicon_io.zip
-    - "/.DS_Store"
-
-functions:
-  getTrafficStat:
-    handler: backend/get_traffic_stat.handler
-    events:
-      - http:
-          path: stats
-          method: get
-          cors: true
-
-resources:
-  Resources:
-    trafficStats:
-      Type: 'AWS::DynamoDB::Table'
-      Properties:
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
-        AttributeDefinitions:
-          - AttributeName: statName
-            AttributeType: S
-        KeySchema:
-          - AttributeName: statName
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-
-custom:
-  client:
-    bucketName: dashboard.cccouncilpublicwebsite.tk
-    distributionFolder: frontend
-    indexDocument: index.html
-    errorDocument: error.html
-
-plugins:
-  - serverless-finch
+    - .DS_Store
+    - frontend/.DS_Store
