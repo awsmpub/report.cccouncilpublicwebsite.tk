@@ -1,7 +1,8 @@
 # serverless.yml
+# report.cccouncilpublicwebsite.tk
 
-service: report-api
-app: dashboard
+service: report
+app: cccouncil
 org: srvlessfwrk
 
 frameworkVersion: '2'
@@ -43,7 +44,6 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
           Resource: "arn:aws:dynamodb:*:*:table/${self:provider.environment.DYNAMODB_TABLE}"
-            # - { "Fn::GetAtt": ["trafficReportsTable", "Arn" ] }
 
   environment:
     DYNAMODB_TABLE: trafficReportsTable

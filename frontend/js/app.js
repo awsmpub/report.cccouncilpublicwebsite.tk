@@ -12,7 +12,7 @@ async function handleFormSubmit(event) {
   
   event.preventDefault();
   const form = event.currentTarget;
-  const url = "https://4aa1igme75.execute-api.ap-southeast-2.amazonaws.com/dev/report/"
+  const url = "https://o1w0xmjtv2.execute-api.ap-southeast-2.amazonaws.com/dev/report/"
   
   const formData = new FormData(document.getElementById("reportForm"));
 
