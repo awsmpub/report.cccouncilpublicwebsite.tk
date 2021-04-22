@@ -26,8 +26,6 @@ def handler(event, context):
     email = matches[0]
     issue = matches[1]
 
-    time.sleep(1)
-
     try:
         dynamodb_client.put_item (TableName=os.environ['DYNAMODB_TABLE'], Item={'reporterEmail': {'S': email}, 'reporterIssue': {'S': issue}})
 

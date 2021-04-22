@@ -1,3 +1,5 @@
+// app.js
+// report.cccouncilpublicwebsite.tk
 
 function refreshPage(event) {
   location.reload()
