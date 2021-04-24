@@ -16,8 +16,6 @@ provider:
   lambdaHashingVersion: 20201221
   apiGateway:
     shouldStartNameWithService: true
-    binaryMediaTypes:
-      - 'multipart/form-data'
 
   iam:
     role:

@@ -1,10 +1,6 @@
 // app.js
 // report.cccouncilpublicwebsite.tk
 
-function refreshPage(event) {
-  location.reload()
-}
-
 function setVisibilityDisplay(element, setVisibility, setDisplay) {
   document.getElementById(element).style.visibility = setVisibility
   document.getElementById(element).style.display = setDisplay
