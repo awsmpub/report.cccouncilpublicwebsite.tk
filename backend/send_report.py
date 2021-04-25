@@ -1,14 +1,7 @@
-
-import json
-import datetime
 import boto3
-from io import BytesIO
 import os
-import logging
-from botocore.exceptions import ClientError
 import base64
 import re
-import time
 
 dynamodb_client = boto3.client('dynamodb')
 

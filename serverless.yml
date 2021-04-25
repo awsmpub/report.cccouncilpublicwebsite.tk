@@ -16,27 +16,12 @@ provider:
   lambdaHashingVersion: 20201221
   apiGateway:
     shouldStartNameWithService: true
+    binaryMediaTypes:
+      - 'multipart/form-data'
 
   iam:
     role:
       statements:
-        - Effect: 'Allow'
-          Action:
-            - 's3:ListBucket'
-          Resource:
-            Fn::Join:
-              - ''
-              - - 'arn:aws:s3:::'
-                - Ref: trafficReportsBucket
-        - Effect: 'Allow'
-          Action:
-            - 's3:PutObject'
-          Resource:
-            Fn::Join:
-              - ''
-              - - 'arn:aws:s3:::'
-                - Ref: trafficReportsBucket
-                - '/*'
         - Effect: Allow
           Action:
             - dynamodb:PutItem
@@ -48,10 +33,6 @@ provider:
 
 resources:
   Resources:
-    trafficReportsBucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: trafficreports.cccouncilpublicwebsite.tk
     trafficReportsTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:
