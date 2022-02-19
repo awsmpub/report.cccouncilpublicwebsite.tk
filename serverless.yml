@@ -5,8 +5,6 @@ service: report
 app: cccouncil
 org: srvlessfwrk
 
-frameworkVersion: '2'
-
 provider:
   name: aws
   runtime: python3.7
